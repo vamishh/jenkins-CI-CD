@@ -12,6 +12,7 @@ pipeline {
     }
     environment {
         Docker_tag = getDockerTag()
+        PATH = "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/sbin:/usr/local/bin" // Adjust this to include the path to Docker binary if it's different
     }
     
     stages {
