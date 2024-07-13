@@ -37,17 +37,14 @@ pipeline{
               stage('build'){
 		      steps {
 			      script{
-                sh 'docker build . -t vamish/jenkins:$Docker_tag'
-                withCredentials([string(credentialsId: 'docker_password', variable: 'docker_password')]) {
+                			sh 'docker build . -t vamish/jenkins:$Docker_tag'
+                			withCredentials([string(credentialsId: 'token', variable: 'docker_password')]) {
     
-                sh '''docker login -u vamish -p $docker_password
-                docker push vamish/jenkins:$Docker_tag
-		'''
-                }
-                
-			      }
-		      }
-              }
-		
-            }	       	     	         
+               				 sh '''docker login -u vamish -p $docker_password
+                			docker push vamish/jenkins:$Docker_tag'''
+                			}
+				}
+			}
+        	}
+	}	       	     	         
 }
