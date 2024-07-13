@@ -1,23 +1,26 @@
 def getDockerTag() {
-    return sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
+    def tag = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
+    return tag
 }
 
 pipeline {
     agent {
         docker {
-            image 'docker:19.03.12' // Use a Docker image that supports DinD
-            args '-v /var/run/docker.sock:/var/run/docker.sock'
+            image 'maven:3.8.1-jdk-11' // Use a specific Maven image with JDK 11
+            args '-v $HOME/.m2:/root/.m2'
         }
     }
     environment {
         Docker_tag = getDockerTag()
+        PATH = "/usr/local/bin:${env.PATH}" // Assuming Docker is installed at /usr/local/bin/docker
     }
+    
     stages {
         stage('Quality Gate Status Check') {
             steps {
                 script {
-                    withSonarQubeEnv('sonarserver') {
-                        sh "mvn clean sonar:sonar"
+                    withSonarQubeEnv('sonarserver') { 
+                        sh "mvn -e -X sonar:sonar"
                     }
                     timeout(time: 1, unit: 'HOURS') {
                         def qg = waitForQualityGate()
@@ -28,8 +31,9 @@ pipeline {
                     sh "mvn clean install"
                 }
             }
-        }
-        stage('Build and Push Docker Image') {
+        }	
+
+        stage('build') {
             steps {
                 script {
                     sh 'docker build . -t vamish/jenkins:$Docker_tag'
@@ -42,5 +46,5 @@ pipeline {
                 }
             }
         }
-    }
+    }	       	     	         
 }
