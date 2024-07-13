@@ -5,18 +5,18 @@ def getDockerTag() {
 pipeline {
     agent {
         docker {
-            image 'maven:3-openjdk-11'
+            image 'docker:19.03.12' // Use a Docker image that supports DinD
+            args '-v /var/run/docker.sock:/var/run/docker.sock'
         }
     }
     environment {
         Docker_tag = getDockerTag()
-        PATH = "/usr/bin:$PATH"
     }
     stages {
         stage('Quality Gate Status Check') {
             steps {
                 script {
-                    withSonarQubeEnv('sonarserver') { 
+                    withSonarQubeEnv('sonarserver') {
                         sh "mvn clean sonar:sonar"
                     }
                     timeout(time: 1, unit: 'HOURS') {
