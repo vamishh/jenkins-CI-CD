@@ -12,6 +12,7 @@ pipeline {
     }
     environment {
         Docker_tag = getDockerTag()
+        PATH = "/usr/bin:${env.PATH}" // Ensure /usr/bin is included in the PATH
     }
     
     stages {
@@ -35,11 +36,11 @@ pipeline {
         stage('build') {
             steps {
                 script {
-                    sh 'docker build . -t vamish/jenkins:$Docker_tag'
+                    sh '/usr/bin/docker build . -t vamish/jenkins:$Docker_tag'
                     withCredentials([string(credentialsId: 'token', variable: 'docker_password')]) {
                         sh '''
-                            docker login -u vamish -p $docker_password
-                            docker push vamish/jenkins:$Docker_tag
+                            /usr/bin/docker login -u vamish -p $docker_password
+                            /usr/bin/docker push vamish/jenkins:$Docker_tag
                         '''
                     }
                 }
